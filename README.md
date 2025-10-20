@@ -48,6 +48,7 @@ If your recruiter asks you to present automation framework on Java language, the
 - Any screenshot taking library/dependency (optional)
 
 Otherwise please review with your recruiter on language that should be used in this challenge.
+For frameworks like Playwright or Cypress please demonstrate your code coverage tor API and Database.
 
 ## 4 Create Automated tests
 
