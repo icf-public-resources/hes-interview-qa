@@ -1,4 +1,4 @@
-# On you termonal please run command:
+# On you terminal please run command:
 # docker compose up -d
 
 services:
@@ -12,7 +12,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=census_app
     volumes:
-      - postgres-data:/var/lib/postgresql/data/
+      - postgres-data:/var/lib/postgresql/
 
 volumes:
   postgres-data:
