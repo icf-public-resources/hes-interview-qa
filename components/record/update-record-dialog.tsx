@@ -55,6 +55,7 @@ import {
   updateRecordWithRelationship,
 } from '@/actions/actionsRecord';
 import { AuthUser, RecordWithRelationship } from '@/types/types';
+import { CalendarIcon } from 'lucide-react';
 
 interface UpdateRecordDialogProps {
   authUser: AuthUser;
@@ -134,6 +135,14 @@ export default function UpdateRecordDialog({
     if (e != 'OTHER') form.setValue('raceOther', '');
   };
 
+  const [dobPickerOpen, setDobPickerOpen] = React.useState(false);
+  const [date, setDate] = React.useState<Date | undefined>(
+    form.getValues('dob')
+      ? new Date(form.getValues('dob') as string)
+      : new Date()
+  );
+  const [month, setMonth] = React.useState<Date | undefined>(date);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -141,7 +150,7 @@ export default function UpdateRecordDialog({
           variant='link'
           name='edit-record-button btn'
           type='button'
-          size='tight'
+          // size='tight'
           onClick={() => {
             setEditRecordDialogOpen(true);
           }}
@@ -239,28 +248,41 @@ export default function UpdateRecordDialog({
                 render={({ field }) => (
                   <FormItem className='sm:col-span-6'>
                     <FormLabel>Date of birth</FormLabel>
-                    <Popover>
-                      <PopoverTrigger>
+                    <Popover
+                      open={dobPickerOpen}
+                      onOpenChange={setDobPickerOpen}
+                    >
+                      <PopoverTrigger asChild>
                         <FormControl>
                           <Input
                             className={cn('pl-3 text-left font-normal')}
-                            placeholder={'Pick a date'}
-                            value={field.value || ''}
+                            placeholder='Pick a date'
+                            value={field.value ?? undefined}
                             onChange={field.onChange}
+                            disabled={isPending}
                           ></Input>
-                          {/* <Button variant={"outline"} className={cn("w-64 pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                             {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            {" "}
-                          </Button> */}
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className='w-auto p-0' align='start'>
+                      <PopoverContent
+                        className='w-auto overflow-hidden p-0'
+                        align='start'
+                        alignOffset={-8}
+                        sideOffset={10}
+                      >
                         <Calendar
+                          classNames={{
+                            day_button: 'size-7',
+                            button_previous: 'size-8 p-2',
+                            button_next: 'size-8 p-2',
+                          }}
                           mode='single'
-                          selected={new Date(field.value) || Date.now()}
+                          selected={date}
+                          captionLayout='dropdown'
+                          month={month}
+                          onMonthChange={setMonth}
                           onSelect={(date) => {
                             field.onChange(format(date as Date, 'MM/dd/yyyy'));
+                            setDobPickerOpen(false);
                           }}
                           disabled={(date) =>
                             date > new Date() || date < new Date('1900-01-01')
