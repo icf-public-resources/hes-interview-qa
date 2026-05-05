@@ -60,7 +60,7 @@ export default auth((req): void | Response | Promise<void | Response> => {
     if (isLoggedIn)
       return setCorsHeaders(
         req,
-        Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl)),
+        NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl)),
       );
     return setCorsHeaders(req, NextResponse.next());
   }
@@ -76,7 +76,7 @@ export default auth((req): void | Response | Promise<void | Response> => {
     // return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
     return setCorsHeaders(
       req,
-      Response.redirect(new URL('/auth/login', nextUrl)),
+      NextResponse.redirect(new URL('/auth/login', nextUrl)),
     );
   }
 
