@@ -5,7 +5,6 @@ import {
   apiAuthPrefix,
   uiAuthPrefix,
   publicRoutes,
-  apiSecuredRoutes,
 } from '@/routes';
 import { NextResponse } from 'next/server';
 
@@ -36,24 +35,20 @@ export default auth((req): void | Response | Promise<void | Response> => {
   }
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+  const isApiRoute = nextUrl.pathname.startsWith('/api');
   const isUiAuthRoute = nextUrl.pathname.startsWith(uiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isApiSecuredRoute = apiSecuredRoutes.some((p) =>
-    nextUrl.pathname.includes(p),
-  );
 
   if (isApiAuthRoute) return setCorsHeaders(req, NextResponse.next());
 
-  if (isApiSecuredRoute && !isPublicRoute) {
-    if (!isLoggedIn)
-      return setCorsHeaders(
-        req,
-        NextResponse.json(
-          { error: "Your token has expired or you aren't logged in!" },
-          { status: 401 },
-        ),
-      );
-    return setCorsHeaders(req, NextResponse.next());
+  if (isApiRoute && !isPublicRoute && !isLoggedIn) {
+    return setCorsHeaders(
+      req,
+      NextResponse.json(
+        { error: "Your token has expired or you aren't logged in!" },
+        { status: 401 },
+      ),
+    );
   }
 
   if (isUiAuthRoute) {
