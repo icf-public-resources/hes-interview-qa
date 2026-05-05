@@ -39,7 +39,7 @@ export default auth((req): void | Response | Promise<void | Response> => {
   return;
 });
 
-// Optionally, don't invoke Middleware on some paths
+// Optionally, don't invoke Proxy on some paths
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };

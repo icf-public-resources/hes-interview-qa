@@ -48,7 +48,7 @@ export function DeleteRecordAlertDialog({ recordWithRelationship, setEditRecordD
           variant="link"
           name="delete-record-button btn"
           type="button"
-          size="tight"
+          size="sm"
           onClick={() => {
             setEditRecordDialogOpen(true);
           }}
