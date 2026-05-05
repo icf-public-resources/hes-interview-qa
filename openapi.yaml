@@ -402,7 +402,7 @@ components:
         city: { type: string }
         state: { type: string }
         zip: { type: string }
-        lienholderId:{ type: integer }
+        lienholderId: { type: integer }
 
     RecordInput:
       type: object
