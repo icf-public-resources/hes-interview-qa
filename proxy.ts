@@ -9,6 +9,9 @@ import {
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 
+const SWAGGER_BEARER_SALT = 'swagger-bearer';
+const API_TOKEN_COOKIE_NAME = 'api_access_token';
+
 const setCorsHeaders = (req: Request, res: Response): Response => {
   const origin = req.headers.get('origin') ?? '*';
   const requestedHeaders = req.headers.get('access-control-request-headers');
@@ -39,9 +42,21 @@ export default auth(async (req): Promise<void | Response> => {
   const isUiAuthRoute = nextUrl.pathname.startsWith(uiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const bearerToken = isApiRoute
-    ? await getToken({ req, secret: process.env.AUTH_SECRET })
+    ? await getToken({
+        req,
+        secret: process.env.AUTH_SECRET,
+        salt: SWAGGER_BEARER_SALT,
+      })
     : null;
-  const isLoggedIn = !!req.auth || !!bearerToken;
+  const cookieToken = isApiRoute
+    ? await getToken({
+        req,
+        secret: process.env.AUTH_SECRET,
+        salt: SWAGGER_BEARER_SALT,
+        cookieName: API_TOKEN_COOKIE_NAME,
+      })
+    : null;
+  const isLoggedIn = !!req.auth || !!bearerToken || !!cookieToken;
 
   if (isApiAuthRoute) return setCorsHeaders(req, NextResponse.next());
 
