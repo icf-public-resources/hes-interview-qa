@@ -98,6 +98,38 @@ paths:
         '401': { description: Invalid credentials }
         '500': { description: Server configuration error }
 
+  /api/auth/whoami:
+    get:
+      tags: [Auth]
+      summary: Check current authentication context (session, bearer header, or API cookie)
+      security: []
+      responses:
+        '200':
+          description: Authenticated context found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated: { type: boolean, example: true }
+                  source:
+                    type: string
+                    enum: [session, bearer-header, api-cookie]
+                  principal:
+                    type: object
+                    properties:
+                      id: { type: string, nullable: true }
+                      name: { type: string, nullable: true }
+                      email: { type: string, nullable: true }
+                  checks:
+                    type: object
+                    properties:
+                      session: { type: boolean }
+                      bearerHeader: { type: boolean }
+                      apiCookie: { type: boolean }
+        '401':
+          description: No valid auth context found
+
   /api/auth/logout:
     post:
       tags: [Auth]
