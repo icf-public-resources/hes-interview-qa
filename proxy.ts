@@ -6,6 +6,7 @@ import {
   uiAuthPrefix,
   publicRoutes,
 } from '@/routes';
+import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 
 const setCorsHeaders = (req: Request, res: Response): Response => {
@@ -26,9 +27,8 @@ const setCorsHeaders = (req: Request, res: Response): Response => {
   return res;
 };
 
-export default auth((req): void | Response | Promise<void | Response> => {
+export default auth(async (req): Promise<void | Response> => {
   const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
 
   if (req.method === 'OPTIONS') {
     return setCorsHeaders(req, new NextResponse(null, { status: 204 }));
@@ -38,6 +38,10 @@ export default auth((req): void | Response | Promise<void | Response> => {
   const isApiRoute = nextUrl.pathname.startsWith('/api');
   const isUiAuthRoute = nextUrl.pathname.startsWith(uiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const bearerToken = isApiRoute
+    ? await getToken({ req, secret: process.env.AUTH_SECRET })
+    : null;
+  const isLoggedIn = !!req.auth || !!bearerToken;
 
   if (isApiAuthRoute) return setCorsHeaders(req, NextResponse.next());
 

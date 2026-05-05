@@ -8,6 +8,9 @@ servers:
   - url: http://localhost:3000
     description: Localhost
 
+security:
+  - bearerAuth: []
+
 tags:
   - name: Auth
     description: Authentication endpoints
@@ -28,6 +31,7 @@ paths:
     post:
       tags: [Auth]
       summary: Register a new user
+      security: []
       requestBody:
         required: true
         content:
@@ -49,6 +53,7 @@ paths:
     post:
       tags: [Auth]
       summary: Log in with credentials
+      security: []
       requestBody:
         required: true
         content:
@@ -67,6 +72,7 @@ paths:
     post:
       tags: [Auth]
       summary: Log out the current session
+      security: []
       responses:
         '200': { description: Logged out }
 
@@ -74,6 +80,7 @@ paths:
     patch:
       tags: [Auth]
       summary: Update password
+      security: []
       requestBody:
         required: true
         content:
@@ -392,6 +399,12 @@ paths:
         '200': { description: Lienholder found }
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     HouseholdInput:
       type: object
