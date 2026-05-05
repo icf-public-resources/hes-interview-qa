@@ -35,6 +35,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - app-net
 
   # ── Next.js application (built directly from the public GitHub repo) ─────────
   app:
@@ -52,6 +54,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - app-net
 
   # ── pgAdmin 4 (browser-based DB admin) ───────────────────────────────────────
   pgadmin:
@@ -68,6 +72,8 @@ services:
       - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
     depends_on:
       - postgres
+    networks:
+      - app-net
 
   # ── Swagger UI (API spec loaded directly from GitHub) ────────────────────────
   swagger-ui:
@@ -79,7 +85,13 @@ services:
     environment:
       SWAGGER_JSON_URL: https://raw.githubusercontent.com/icf-public-resources/hes-interview-qa/app-deployment/openapi.yaml
       BASE_URL: /
+    networks:
+      - app-net
 
 volumes:
   postgres-data:
   pgadmin-data:
+
+networks:
+  app-net:
+    driver: bridge
