@@ -37,9 +37,9 @@ export async function GET(request: NextRequest) {
       }
     : headerToken || cookieToken
       ? {
-          id: (headerToken?.sub ?? cookieToken?.sub) ?? null,
-          name: (headerToken?.name ?? cookieToken?.name) ?? null,
-          email: (headerToken?.email ?? cookieToken?.email) ?? null,
+          id: headerToken?.sub ?? cookieToken?.sub ?? null,
+          name: headerToken?.name ?? cookieToken?.name ?? null,
+          email: headerToken?.email ?? cookieToken?.email ?? null,
         }
       : null;
 
