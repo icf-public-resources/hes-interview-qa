@@ -1,18 +1,84 @@
-# On you terminal please run command:
-# docker compose up -d
+# ─────────────────────────────────────────────────────────────────────────────
+# Census App — standalone docker-compose
+#
+# Prerequisites: Docker Desktop (https://www.docker.com/) — nothing else needed.
+#
+# 1. Save this file anywhere on your computer as docker-compose.yml
+# 2. Open a terminal in the same folder and run:
+#        docker compose up -d
+# 3. Wait ~2 minutes for the first build, then open:
+#
+#   App       → http://localhost:3000
+#   Swagger   → http://localhost:8080
+#   pgAdmin 4 → http://localhost:5050  (login: admin@admin.com / admin)
+#
+# To stop:        docker compose down
+# To stop + wipe: docker compose down -v
+# ─────────────────────────────────────────────────────────────────────────────
 
 services:
+  # ── PostgreSQL database ──────────────────────────────────────────────────────
   postgres:
-    image: 'postgres:latest'
+    image: postgres:16
     container_name: postgres
+    restart: unless-stopped
     ports:
-      - 5432:5432
+      - '5432:5432'
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=census_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: census_app
     volumes:
-      - postgres-data:/var/lib/postgresql/
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d census_app']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Next.js application (built directly from the public GitHub repo) ─────────
+  app:
+    build:
+      context: https://github.com/icf-public-resources/hes-interview-qa.git#app-deployment
+      dockerfile: Dockerfile
+    container_name: census_app
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/census_app?schema=public
+      AUTH_SECRET: 1hWCheVza3jTjPXzK1RpkKA08crxLKKCBXLPhX9Ts2mA
+      NEXTAUTH_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── pgAdmin 4 (browser-based DB admin) ───────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    ports:
+      - '5050:80'
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+  # ── Swagger UI (API spec loaded directly from GitHub) ────────────────────────
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: swagger_ui
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    environment:
+      SWAGGER_JSON_URL: https://raw.githubusercontent.com/icf-public-resources/hes-interview-qa/app-deployment/openapi.yaml
+      BASE_URL: /
 
 volumes:
   postgres-data:
+  pgadmin-data:

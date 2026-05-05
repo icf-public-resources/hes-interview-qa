@@ -1,8 +1,25 @@
 # Deploy on your computer
 
+There are **two ways** to run this project locally. Pick whichever fits you best.
+
+|            | Option A – Full Docker (recommended) | Option B – Manual (Node.js) |
+| ---------- | ------------------------------------ | --------------------------- |
+| Requires   | Docker Desktop only                  | Docker Desktop + Node.js    |
+| Effort     | One command                          | Several steps               |
+| Hot-reload | No                                   | Yes (`npm run dev`)         |
+
 Please follow instructions. If you encounter any issues please don't hesitate to contact Sobir.
 
 ## Content
+
+### Option A – Full Docker (all-in-one)
+
+- [Option A: Prerequisites](#option-a-prerequisites)
+- [Option A: Start all containers](#option-a-start-all-containers)
+- [Option A: Service URLs](#option-a-service-urls)
+- [Option A: Connect to the database](#option-a-connect-to-the-database)
+
+### Option B – Manual (Node.js)
 
 - [Run Postgres Container](#run-postgres-container)
 - [Connect DBeaver to database](#connect-dbeaver-to-database)
@@ -11,7 +28,86 @@ Please follow instructions. If you encounter any issues please don't hesitate to
 - [Install dependencies](#install-dependencies)
 - [Sync Database](#sync-database)
 - [Run application](#run-application)
+
 - [back to interview instruction](../README.md)
+
+---
+
+## Option A: Prerequisites
+
+[Content](#content)
+
+Install **Docker Desktop** from https://www.docker.com/ and make sure it is running.
+
+## Option A: Start all containers
+
+[Content](#content)
+
+From the repository root run:
+
+```bash
+docker compose up -d
+```
+
+Docker will build and start **four containers**:
+
+| Container    | What it is                            | Port |
+| ------------ | ------------------------------------- | ---- |
+| `postgres`   | PostgreSQL 16 database                | 5432 |
+| `census_app` | Next.js application                   | 3000 |
+| `pgadmin`    | pgAdmin 4 — browser-based DB admin UI | 5050 |
+| `swagger_ui` | Swagger UI — interactive API docs     | 8080 |
+
+The app container automatically runs Prisma migrations on first start, so the database schema is created for you.
+
+To stop everything:
+
+```bash
+docker compose down
+```
+
+To stop and wipe all data volumes (full reset):
+
+```bash
+docker compose down -v
+```
+
+## Option A: Service URLs
+
+[Content](#content)
+
+Once all containers are running, open these URLs in your browser:
+
+- **Application** → http://localhost:3000
+- **Swagger UI** (API docs) → http://localhost:8080
+- **pgAdmin 4** (database admin) → http://localhost:5050
+
+## Option A: Connect to the database
+
+[Content](#content)
+
+### pgAdmin 4 (browser-based — included in Docker stack)
+
+1. Open http://localhost:5050
+2. Log in: email `admin@admin.com`, password `admin`
+3. Click **Add New Server**
+   - **General → Name**: `census_app`
+   - **Connection → Host**: `postgres`
+   - **Connection → Port**: `5432`
+   - **Connection → Username**: `postgres`
+   - **Connection → Password**: `postgres`
+4. Click **Save**
+
+### DBeaver (desktop client — optional, connects to the same DB)
+
+If you prefer DBeaver, install it from https://dbeaver.io/ and connect to:
+
+- Host: `localhost`, Port: `5432`
+- Database: `census_app`, Username: `postgres`, Password: `postgres`
+
+> **Note**: DBeaver is a desktop application and **cannot** run as a Docker container. pgAdmin 4 (above) is the containerised equivalent included in the Docker stack.
+
+---
 
 ## Run Postgres Container
 
