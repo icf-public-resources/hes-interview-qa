@@ -53,7 +53,6 @@ export function DeleteRecordAlertDialog({
           variant='link'
           name='delete-record-button btn'
           type='button'
-          size='sm'
           onClick={() => {
             setEditRecordDialogOpen(true);
           }}
