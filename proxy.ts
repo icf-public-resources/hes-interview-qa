@@ -1,7 +1,13 @@
 // const { auth } = NextAuth(authConfig);
-import { auth } from "@/auth";
-import { DEFAULT_LOGIN_REDIRECT, apiAuthPrefix, uiAuthPrefix, publicRoutes, apiSecuredRoutes } from "@/routes";
-import { NextResponse } from "next/server";
+import { auth } from '@/auth';
+import {
+  DEFAULT_LOGIN_REDIRECT,
+  apiAuthPrefix,
+  uiAuthPrefix,
+  publicRoutes,
+  apiSecuredRoutes,
+} from '@/routes';
+import { NextResponse } from 'next/server';
 
 export default auth((req): void | Response | Promise<void | Response> => {
   const { nextUrl } = req;
@@ -10,17 +16,24 @@ export default auth((req): void | Response | Promise<void | Response> => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isUiAuthRoute = nextUrl.pathname.startsWith(uiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-  const isApiSecuredRoute = apiSecuredRoutes.some((p) => nextUrl.pathname.includes(p));
+  const isApiSecuredRoute = apiSecuredRoutes.some((p) =>
+    nextUrl.pathname.includes(p),
+  );
 
   if (isApiAuthRoute) return;
 
   if (isApiSecuredRoute && !isPublicRoute) {
-    if (!isLoggedIn) return NextResponse.json({ error: "Your token has expired or you aren't logged in!" }, { status: 401 });
+    if (!isLoggedIn)
+      return NextResponse.json(
+        { error: "Your token has expired or you aren't logged in!" },
+        { status: 401 },
+      );
     return;
   }
 
   if (isUiAuthRoute) {
-    if (isLoggedIn) return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    if (isLoggedIn)
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     return;
   }
 
@@ -33,7 +46,7 @@ export default auth((req): void | Response | Promise<void | Response> => {
     // const encodedCallbackUrl = encodeURIComponent(callbackUrl);
 
     // return Response.redirect(new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, nextUrl));
-    return Response.redirect(new URL("/auth/login", nextUrl));
+    return Response.redirect(new URL('/auth/login', nextUrl));
   }
 
   return;
@@ -41,5 +54,5 @@ export default auth((req): void | Response | Promise<void | Response> => {
 
 // Optionally, don't invoke Proxy on some paths
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };
