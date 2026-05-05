@@ -82,8 +82,15 @@ services:
     ports:
       - '8080:8080'
     environment:
-      SWAGGER_JSON_URL: https://raw.githubusercontent.com/icf-public-resources/hes-interview-qa/app-deployment/openapi.yaml
+      SWAGGER_JSON: /tmp/openapi.yaml
       BASE_URL: /
+    command:
+      - /bin/sh
+      - -c
+      - |
+        wget -qO /tmp/openapi.yaml https://raw.githubusercontent.com/icf-public-resources/hes-interview-qa/app-deployment/openapi.yaml
+        sed -i 's#http://census_app:3000#http://localhost:3000#g' /tmp/openapi.yaml
+        /docker-entrypoint.sh nginx -g 'daemon off;'
     networks:
       - app-net
 
