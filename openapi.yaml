@@ -7,8 +7,6 @@ info:
 servers:
   - url: http://localhost:3000
     description: Localhost
-  - url: http://census_app:3000
-    description: Docker internal network
 
 tags:
   - name: Auth
