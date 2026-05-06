@@ -41,7 +41,7 @@ services:
   # ── Next.js application (built directly from the public GitHub repo) ─────────
   app:
     build:
-      context: https://github.com/icf-public-resources/hes-interview-qa.git#app-deployment
+      context: https://github.com/icf-public-resources/hes-interview-qa.git
       dockerfile: Dockerfile
     container_name: census_app
     restart: unless-stopped
@@ -82,7 +82,7 @@ services:
     ports:
       - '5051:8080'
     environment:
-      SWAGGER_JSON_URL: https://raw.githubusercontent.com/icf-public-resources/hes-interview-qa/app-deployment/openapi.yaml
+      SWAGGER_JSON_URL: https://raw.githubusercontent.com/icf-public-resources/hes-interview-qa/main/openapi.yaml
       BASE_URL: /
     networks:
       - app-net
