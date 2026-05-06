@@ -47,7 +47,7 @@ export default function Navbar({ authUser }: { authUser: AuthUser | null }) {
     },
     {
       name: 'Swagger',
-      href: 'http://localhost:5051',
+      href: 'http://localhost:8080',
       current: false,
       target: '_blank',
       rel: 'noopener noreferrer',

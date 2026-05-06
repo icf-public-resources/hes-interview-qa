@@ -56,7 +56,7 @@ Once the command finishes, open these URLs in your browser:
 | Service                    | URL                   | Credentials                                  |
 | -------------------------- | --------------------- | -------------------------------------------- |
 | Application                | http://localhost:3000 | _(register a new account)_                   |
-| API Docs (Swagger)         | http://localhost:5051 | _(no login)_                                 |
+| API Docs (Swagger)         | http://localhost:8080 | _(no login)_                                 |
 | Database Admin (pgAdmin 4) | http://localhost:5050 | email: `admin@admin.com` / password: `admin` |
 
 ---
