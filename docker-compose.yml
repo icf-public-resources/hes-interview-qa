@@ -9,7 +9,7 @@
 # 3. Wait ~2 minutes for the first build, then open:
 #
 #   App       → http://localhost:3000
-#   Swagger   → http://localhost:8080
+#   Swagger   → http://localhost:5051
 #   pgAdmin 4 → http://localhost:5050  (login: admin@admin.com / admin)
 #
 # To stop:        docker compose down
@@ -80,18 +80,10 @@ services:
     container_name: swagger_ui
     restart: unless-stopped
     ports:
-      - '8080:8080'
+      - '5051:8080'
     environment:
       SWAGGER_JSON_URL: https://github.com/icf-public-resources/hes-interview-qa.git#app-deployment/openapi.yaml
-      # SWAGGER_JSON: /tmp/openapi.yaml
       BASE_URL: /
-    # command:
-    #   - /bin/sh
-    #   - -c
-    #   - |
-    #     wget -qO /tmp/openapi.yaml https://raw.githubusercontent.com/icf-public-resources/hes-interview-qa/app-deployment/openapi.yaml
-    #     sed -i 's#http://census_app:3000#http://localhost:3000#g' /tmp/openapi.yaml
-    #     /docker-entrypoint.sh nginx -g 'daemon off;'
     networks:
       - app-net
 
