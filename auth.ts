@@ -1,8 +1,8 @@
-import NextAuth from "next-auth";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { db } from "@/lib/db";
-import authConfig from "@/auth.config";
-import { dbGetUserById } from "@/data/dbUsers";
+import NextAuth from 'next-auth';
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import { db } from '@/lib/db';
+import authConfig from '@/auth.config';
+import { dbGetUserById } from '@/data/dbUsers';
 
 export const {
   handlers: { GET, POST },
@@ -12,8 +12,8 @@ export const {
   unstable_update,
 } = NextAuth({
   pages: {
-    signIn: "/auth/login",
-    error: "/auth/error",
+    signIn: '/auth/login',
+    error: '/auth/error',
   },
   events: {
     //   async linkAccount({ user }) {
@@ -25,7 +25,9 @@ export const {
   },
   callbacks: {
     async signIn({ user }) {
-      const existingUser = user.id ? await dbGetUserById(parseInt(user.id)) : null;
+      const existingUser = user.id
+        ? await dbGetUserById(parseInt(user.id))
+        : null;
       if (!existingUser) return false;
       return true;
     },
@@ -39,7 +41,7 @@ export const {
       // if (!token.sub) return token;
       // const existingUser = await dbGetUserById(parseInt(token.sub as string));
       // if (!existingUser) return token;
-      if (trigger === "update" && session) {
+      if (trigger === 'update' && session) {
         const { name, email, image } = session;
         if (name) token.name = name;
         if (email) token.email = email;
@@ -49,9 +51,10 @@ export const {
       return token;
     },
   },
+  trustHost: true,
   adapter: PrismaAdapter(db),
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     // Seconds - How long until an idle session expires and is no longer valid.
     // 30 * 24 * 60 * 60, // 30 days
     maxAge: 2 * 60 * 60, // 2 hours

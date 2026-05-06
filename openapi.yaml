@@ -1,0 +1,487 @@
+openapi: '3.0.3'
+info:
+  title: Census App API
+  description: REST API for the Census App — a household and record management system.
+  version: '1.0.0'
+
+servers:
+  - url: http://localhost:3000
+    description: Localhost
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: User
+    description: User management
+  - name: Household
+    description: Household management
+  - name: Record
+    description: Record management
+  - name: Relative
+    description: Relative management
+  - name: Lienholder
+    description: Lienholder management
+
+paths:
+  # ── Auth ────────────────────────────────────────────────────────────────────
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name: { type: string, example: 'Jane Doe' }
+                email:
+                  { type: string, format: email, example: 'jane@example.com' }
+                password: { type: string, minLength: 6, example: 'secret123' }
+      responses:
+        '201': { description: User created }
+        '400': { description: Validation error }
+        '409': { description: Email already in use }
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in with credentials
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200': { description: Authenticated }
+        '401': { description: Invalid credentials }
+
+  /api/auth/token:
+    post:
+      tags: [Auth]
+      summary: Create bearer token for API clients (Swagger)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Bearer token created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  tokenType: { type: string, example: Bearer }
+                  expiresIn: { type: integer, example: 7200 }
+        '400': { description: Invalid request payload }
+        '401': { description: Invalid credentials }
+        '500': { description: Server configuration error }
+
+  /api/auth/whoami:
+    get:
+      tags: [Auth]
+      summary: Check current authentication context (session, bearer header, or API cookie)
+      responses:
+        '200':
+          description: Authenticated context found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated: { type: boolean, example: true }
+                  source:
+                    type: string
+                    enum: [session, bearer-header, api-cookie]
+                  principal:
+                    type: object
+                    properties:
+                      id: { type: string, nullable: true }
+                      name: { type: string, nullable: true }
+                      email: { type: string, nullable: true }
+                  checks:
+                    type: object
+                    properties:
+                      session: { type: boolean }
+                      bearerHeader: { type: boolean }
+                      apiCookie: { type: boolean }
+        '401':
+          description: No valid auth context found
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out the current session
+      security: []
+      responses:
+        '200': { description: Logged out }
+
+  /api/auth/password:
+    patch:
+      tags: [Auth]
+      summary: Update password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword: { type: string, minLength: 6 }
+      responses:
+        '200': { description: Password updated }
+        '400': { description: Validation error }
+        '401': { description: Incorrect current password }
+
+  # ── User ────────────────────────────────────────────────────────────────────
+  /api/user:
+    get:
+      tags: [User]
+      summary: Get user by id or email
+      parameters:
+        - in: query
+          name: id
+          schema: { type: integer }
+          description: User ID
+        - in: query
+          name: email
+          schema: { type: string, format: email }
+          description: User email
+      responses:
+        '200': { description: User found }
+        '403': { description: At least one query param required }
+        '404': { description: User not found }
+    patch:
+      tags: [User]
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id: { type: integer }
+                name: { type: string }
+                email: { type: string, format: email }
+                image: { type: string }
+      responses:
+        '200': { description: User updated }
+        '400': { description: Validation error }
+    delete:
+      tags: [User]
+      summary: Delete user by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id: { type: integer }
+      responses:
+        '200': { description: User deleted }
+        '404': { description: User not found }
+
+  /api/user/id/{id}:
+    get:
+      tags: [User]
+      summary: Get user by ID (path param)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: User found }
+        '404': { description: Not found }
+
+  /api/user/email/{email}:
+    get:
+      tags: [User]
+      summary: Get user by email (path param)
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: User found }
+        '404': { description: Not found }
+
+  # ── Household ───────────────────────────────────────────────────────────────
+  /api/household:
+    get:
+      tags: [Household]
+      summary: Get household by user id or email
+      parameters:
+        - in: query
+          name: id
+          schema: { type: integer }
+        - in: query
+          name: email
+          schema: { type: string, format: email }
+      responses:
+        '200': { description: Household found }
+        '403': { description: At least one query param required }
+        '404': { description: Not found }
+    put:
+      tags: [Household]
+      summary: Create a new household
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HouseholdInput' }
+      responses:
+        '201': { description: Household created }
+        '400': { description: Validation error }
+    patch:
+      tags: [Household]
+      summary: Update an existing household
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/HouseholdInput' }
+      responses:
+        '200': { description: Household updated }
+        '400': { description: Validation error }
+
+  /api/household/id/{id}:
+    get:
+      tags: [Household]
+      summary: Get household by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Household found }
+        '404': { description: Not found }
+
+  /api/household/user/id/{id}:
+    get:
+      tags: [Household]
+      summary: Get household by user ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Household found }
+
+  /api/household/user/email/{email}:
+    get:
+      tags: [Household]
+      summary: Get household by user email
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Household found }
+
+  # ── Record ──────────────────────────────────────────────────────────────────
+  /api/record:
+    get:
+      tags: [Record]
+      summary: Get all records
+      responses:
+        '200': { description: List of records }
+    put:
+      tags: [Record]
+      summary: Create a new record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecordInput' }
+      responses:
+        '201': { description: Record created }
+    patch:
+      tags: [Record]
+      summary: Update a record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RecordInput' }
+      responses:
+        '200': { description: Record updated }
+
+  /api/record/id/{id}:
+    get:
+      tags: [Record]
+      summary: Get record by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Record found }
+    delete:
+      tags: [Record]
+      summary: Delete record by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Record deleted }
+
+  /api/record/user/id/{id}:
+    get:
+      tags: [Record]
+      summary: Get records by user ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Records found }
+
+  /api/record/user/email/{email}:
+    get:
+      tags: [Record]
+      summary: Get records by user email
+      parameters:
+        - in: path
+          name: email
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Records found }
+
+  /api/record/household/id/{id}:
+    get:
+      tags: [Record]
+      summary: Get records by household ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Records found }
+
+  # ── Relative ────────────────────────────────────────────────────────────────
+  /api/relative:
+    get:
+      tags: [Relative]
+      summary: Get all relatives
+      responses:
+        '200': { description: List of relatives }
+    put:
+      tags: [Relative]
+      summary: Create a relative
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201': { description: Relative created }
+
+  /api/relative/user/id/{id}:
+    get:
+      tags: [Relative]
+      summary: Get relatives by user ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Relatives found }
+
+  # ── Lienholder ──────────────────────────────────────────────────────────────
+  /api/lienholder:
+    get:
+      tags: [Lienholder]
+      summary: Get all lienholders
+      responses:
+        '200': { description: List of lienholders }
+    put:
+      tags: [Lienholder]
+      summary: Create a lienholder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+      responses:
+        '201': { description: Lienholder created }
+
+  /api/lienholder/id/{id}:
+    get:
+      tags: [Lienholder]
+      summary: Get lienholder by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        '200': { description: Lienholder found }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    HouseholdInput:
+      type: object
+      properties:
+        id: { type: integer }
+        userId: { type: integer }
+        address: { type: string }
+        city: { type: string }
+        state: { type: string }
+        zip: { type: string }
+        lienholderId: { type: integer }
+
+    RecordInput:
+      type: object
+      properties:
+        id: { type: integer }
+        householdId: { type: integer }
+        description: { type: string }
+        amount: { type: number }
