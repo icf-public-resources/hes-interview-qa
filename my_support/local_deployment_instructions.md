@@ -79,7 +79,7 @@ docker compose down -v
 Once all containers are running, open these URLs in your browser:
 
 - **Application** → http://localhost:3000
-- **Swagger UI** (API docs) → http://localhost:8080
+- **Swagger UI** (API docs) → http://localhost:5051
 - **pgAdmin 4** (database admin) → http://localhost:5050
 
 ## Option A: Connect to the database
