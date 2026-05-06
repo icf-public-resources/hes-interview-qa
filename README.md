@@ -1,79 +1,164 @@
-# Census App for QA testing
+# Census App for QA Testing
 
-This is a full stack QA Testing Challenge. It has nothing to do with real Census project. Sole intention for this application is to facilitate QA testing for all 3 layers: UI, API, Database. When creating new demographic records please don't use any PII (Personal Identifiable Information) rather please create records of unreal people. Good practice for QA environment when creating dummy data is to utilize `FAKE` word in first and last names and emails.
+This is a full stack QA Testing Challenge. It has nothing to do with a real Census project. The sole intention of this application is to facilitate QA testing across all 3 layers: UI, API, and Database. When creating new demographic records, please don't use any PII (Personal Identifiable Information). Instead, create records for fictional people. A good QA practice for dummy data is to include the word `FAKE` in first and last names and emails.
 
-## Interview instructions
+## Overview
 
-You are expected to be on interview with
+You are expected to arrive at the interview with:
 
-- locally running census app and postgres database
-- Automation framework with test scenarios
-- DBeaver connected to postgres database
-- [Postman](https://www.postman.com/) with collection having API requests to census app.
+- A locally running Census app and PostgreSQL database
+- An automation framework with test scenarios
+- A database client connected to PostgreSQL (pgAdmin or DBeaver)
+- [Postman](https://www.postman.com/) with API requests to the Census app
 
-## Content
+## Contents
 
-- [1 Deploy census app](#1-deploy-census-app)
-- [2 UI test preconditions](#2-ui-test-preconditions)
-- [3 Framework setup](#3-framework-setup)
-- [4 Create Automated tests](#4-create-automated-tests)
-- [API documentation](#api-documentation)
+- [1. Deploy the Application](#1-deploy-the-application)
+- [2. Connect to the Database](#2-connect-to-the-database)
+- [3. UI Test Preconditions](#3-ui-test-preconditions)
+- [4. Framework Setup](#4-framework-setup)
+- [5. Create Automated Tests](#5-create-automated-tests)
+- [API Documentation](#api-documentation)
 
-## 1 Deploy census app
+## 1. Deploy the Application
 
-Please deploy application by following [local deployment instructions](my_support/local_deployment_instructions.md).
+### Prerequisites
 
-## 2 UI test preconditions
+Install **Docker Desktop** from https://www.docker.com/ and ensure it is running.
 
-[Content](#content)
+### Start All Containers
 
-1. As you have application up and running please open url `localhost:3000/` on your preferred browser and manually register your first user and login.
-2. Add household. Please don't use any real addresses.
-3. Add record with relationship = `SELF`. Please don't use any PII (Personal Identifiable Information). When creating dummy data for personal demographic information QA best practice is to add `FAKE` word to beginning of names.
+The deployment is simple — just one command! The `docker-compose.yml` file will be provided to you separately.
 
-## 3 Framework setup
+From your terminal, run:
 
-[Content](#content)
+```bash
+docker compose up -d
+```
 
-If your recruiter asks you to present automation framework on Java language, then please have your test automation framework setup using next software:
+Docker will build and start **four containers**:
+
+| Container    | Purpose                               | Port |
+| ------------ | ------------------------------------- | ---- |
+| `postgres`   | PostgreSQL 16 database                | 5432 |
+| `census_app` | Next.js application                   | 3000 |
+| `pgadmin`    | pgAdmin 4 — browser-based DB admin UI | 5050 |
+| `swagger_ui` | Swagger UI — interactive API docs     | 5051 |
+
+The app container automatically runs Prisma migrations on first start, so the database schema is created for you.
+
+### Access the Application
+
+Once all containers are running, open these URLs in your browser:
+
+- **Application** → http://localhost:3000
+- **Swagger UI** (API docs) → http://localhost:5051
+- **pgAdmin 4** (database admin) → http://localhost:5050
+
+### Stop and Clean Up
+
+To stop all containers:
+
+```bash
+docker compose down
+```
+
+To stop and wipe all data volumes (full reset):
+
+```bash
+docker compose down -v
+```
+
+## 2. Connect to the Database
+
+Choose one of the two options below to access your database.
+
+### Option A: pgAdmin 4 (Browser-based)
+
+pgAdmin 4 is already included in the Docker stack and requires no additional installation.
+
+1. Open http://localhost:5050
+2. Log in with:
+   - Email: `admin@admin.com`
+   - Password: `admin`
+3. Click **Add New Server**
+4. Fill in the connection details:
+   - **General → Name**: `census_app`
+   - **Connection → Host**: `postgres`
+   - **Connection → Port**: `5432`
+   - **Connection → Username**: `postgres`
+   - **Connection → Password**: `postgres`
+5. Click **Save**
+
+### Option B: DBeaver (Desktop Client)
+
+If you prefer a desktop application, install DBeaver Community from https://dbeaver.io/ and connect with:
+
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database**: `census_app`
+- **Username**: `postgres`
+- **Password**: `postgres`
+
+## 3. UI Test Preconditions
+
+Before you start creating automated tests, perform these manual steps to set up test data:
+
+1. Open http://localhost:3000 in your browser
+2. Register a new user and log in (use `FAKE` in your email, e.g., `fake-user@example.com`)
+3. Add a household (do not use real addresses)
+4. Add a record with relationship = `SELF` (do not use any PII; use `FAKE` in names)
+
+## 4. Framework Setup
+
+Programming language and framework is up to your. Please use you are most experienced and confident in. Below are recommended tech stacks:
+
+### For Java
 
 - IntelliJ IDE
 - Java
 - Maven
-- Cucumber or JUnit or TestNG
+- Cucumber (BDD) or JUnit / TestNG (TDD)
 - Selenium
-- Rest assured
-- JDBC
+- RestAssured (API testing)
+- JDBC (database testing)
 - Cucumber HTML Reporting (optional)
-- Any screenshot taking library/dependency (optional)
+- Screenshot library (optional)
 
-Otherwise please review with your recruiter on language that should be used in this challenge.
-For frameworks like Playwright or Cypress please demonstrate your code coverage tor API and Database.
+### For Other Languages (Playwright, Cypress, etc.)
 
-## 4 Create Automated tests
+Ensure your framework can test all 3 layers: UI, API, and Database.
 
-[Content](#content)
+## 5. Create Automated Tests
 
-Please create reusable parameterized Cucumber (BDD) steps in scenarios or using JUnit or TestNG (TDD) to test 3 user stories described below. Please try to utilize `configuration.properties` file of any of `.env` file approach to get some environment variable from.
+Create reusable, parameterized test scenarios using your chosen framework to test the requirements below. Use `configuration.properties` or `.env` files for environment variables.
 
-Acceptance criteria:
+### Acceptance Criteria
 
-1. **User should be able to add new person record to household on UI.**
-   You can create your own Cucumber steps (BDD) or test scripts (TDD) to achieve goal. _As optional for extra points please save added personal demographic info to storage as POJO object or any other data format of your choice._
+1. **User should be able to add a new person record to a household on the UI**
+   - Create your own Cucumber steps (BDD) or test scripts (TDD) to achieve this goal
+   - Optional: Save the added personal demographic info to storage as a POJO object or other data format
 
-2. **Added person's record should be returned in API call.** Validate that added person's data returned in API call with correct values submitted on UI. Please refer to [API documentation](#api-documentation) below. _As optional for extra points please use [jackson-databind](https://github.com/FasterXML/jackson-databind) to create and compare POJO objects or compare saved data in your storage using data format of your choice._
+2. **Added person's record should be returned in an API call**
+   - Validate that the API returns the correct data for the added person
+   - Verify all submitted values match the data returned by the API
+   - See [API Documentation](#api-documentation) below
 
-3. **Added person's record should be found in database.** please review database schema on DBeaver to understand table relationships. Using your JDBC validate that new record saved with correct data. _As optional for extra points please use [jackson-databind](https://github.com/FasterXML/jackson-databind) to create and compare POJO objects or compare saved data in your storage using data format of your choice._
+3. **Added person's record should be found in the database**
+   - Use your database client (pgAdmin or DBeaver) to review the database schema and table relationships
+   - Use JDBC to validate that the new record was saved with correct data
+   - Optional: Use [jackson-databind](https://github.com/FasterXML/jackson-databind) to create and compare POJO objects
 
-4. **As optional for extra points please** create automation scenarios updating, deleting records on UI
+4. **Bonus: Update and delete records on the UI**
+   - Optional: Create automation scenarios for updating and deleting records
 
-## API documentation
+## API Documentation
 
-[Content](#content)
+### 1. Login
 
-1. Login
+**POST** `http://localhost:3000/api/auth/login`
 
-**POST** `http://localhost/api/auth/login` with payload:
+Request body:
 
 ```json
 {
@@ -82,18 +167,24 @@ Acceptance criteria:
 }
 ```
 
-Token will be saved in cookies and will be automatically available for next API calls. So no need to save token. Token will be expired in 4 hours.
+On Postman the authentication token is saved in cookies and automatically available for subsequent API calls. Token expiration: 4 hours.
 
-2. Get records for user by email
+### 2. Get Records for User by Email
 
-**GET** `http://localhost/api/record/user/email/[email]`. Please have your email instead of `[email]` endpoint parameter.
+**GET** `http://localhost:3000/api/record/user/email/[email]`
 
-3. Get records for user by query parameters
+Replace `[email]` with the user's email address.
 
-**GET** `http://localhost/api/record/user`. At least one query params should be used. Query params in use order:
+Example: `http://localhost:3000/api/record/user/email/fake-user@example.com`
 
-- email: string, email format
-- id: number
+### 3. Get Records for User by Query Parameters
+
+**GET** `http://localhost:3000/api/record/user`
+
+Use at least one query parameter. Supported parameters (in order of preference):
+
+- `email` (string, email format)
+- `id` (number)
 
 ## License
 
