@@ -1,28 +1,34 @@
 # ── Stage 1: Install dependencies ─────────────────────────────────────────────
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat openssl
+FROM node:20-bookworm-slim AS deps
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
 RUN npm ci
 
 # ── Stage 2: Build the application ────────────────────────────────────────────
-FROM node:20-alpine AS builder
-RUN apk add --no-cache libc6-compat openssl
+FROM node:20-bookworm-slim AS builder
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma client
-RUN npx prisma generate
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # ── Stage 3: Production runner ────────────────────────────────────────────────
-FROM node:20-alpine AS runner
-RUN apk add --no-cache libc6-compat openssl
+FROM node:20-bookworm-slim AS runner
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 
 ENV NODE_ENV=production
